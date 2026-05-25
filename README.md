@@ -13,51 +13,35 @@ server:
 ```
 import socket
 
-server = socket.socket()
-server.bind(('localhost', 8000))
-server.listen(1)
-print("Server is listening...")
-conn, addr = server.accept()
-print(f"Connected with {addr}")
+s = socket.socket()
+s.connect(('localhost', 8000))
 
 while True:
-    data = conn.recv(1024).decode()
-
-    if data:
-        print(f"Received: {data}")
-        conn.send("ACK".encode())
-
-        if data.lower() == 'exit':  
-            print("Connection closed by client")
-            conn.close()
-            break
+    print(s.recv(1024).decode())
+    s.send("Acknowledgement Received".encode())
 ```
 client 
 ```
 import socket
-import time
 
-client = socket.socket()
-client.connect(('localhost', 8000))
-client.settimeout(5)  
+s = socket.socket()
+s.bind(('localhost', 8000))
+s.listen(5)
+
+c, addr = s.accept()
 
 while True:
-    msg = input("Enter a message (or type 'exit' to quit): ")
+    i = input("Enter a data: ")
+    c.send(i.encode())
 
-    client.send(msg.encode())  
+    ack = c.recv(1024).decode()
 
-    if msg.lower() == 'exit':  
-        print("Connection closed by client")
-        client.close()
-        break
-
-    try:
-        ack = client.recv(1024).decode()
-        if ack == "ACK":
-            print(f"Server acknowledged: {ack}")
-    except socket.timeout:
-        print("No ACK received, retransmitting...")
+    if ack:
+        print(ack)
         continue
+    else:
+        c.close()
+        break
 ```
 ## OUTPUT
 <img width="1080" height="356" alt="image" src="https://github.com/user-attachments/assets/f69833e0-870a-4e66-adf9-87a10e812b3a" />
